@@ -1,0 +1,48 @@
+version: '3.8'
+
+networks:
+  user:
+    driver: bridge
+
+services:
+  # Nginx client service
+  client:
+    container_name: client
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - user
+
+  # Spring Boot backend service
+  backend:
+    container_name: server
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - user
+    depends_on:
+      - mysql
+
+  # MySQL database service
+  mysql:
+    image: 'mysql:latest'
+    container_name: userDb
+    restart: on-failure
+    environment:
+      - 'MYSQL_DATABASE=user'
+      - 'MYSQL_PASSWORD=pass'
+      - 'MYSQL_ROOT_PASSWORD=pass'
+      - 'MYSQL_USER=jemak'
+    ports:
+      - '3306:3306'
+    networks:
+      - user
+
+volumes:
+  mysql-data:
